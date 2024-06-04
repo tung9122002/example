@@ -68,7 +68,10 @@ class StepController extends Controller
     }
     public function submit(Request $request){
         // gửi submit
+        $request->session()->forget(['meal', 'people', 'restaurant', 'dishes']);
+
         $request->session()->flash('success', 'Submit thành công!');
+
         return redirect()->route('step', ['tab' => 'step_1']);
     }
 }

@@ -1,7 +1,6 @@
 @extends('layouts.layout')
 
 @section('content')
-
     <div class="row text-center">
         <div class="col-sm border">
             <div class="text-dark" >
@@ -31,7 +30,7 @@
                 <select class="form-control" name="restaurant" required>
                     <option value="">---- Choose Restaurant ----</option>
                     @foreach($restaurantsResult as $key => $restaurant)
-                        <option value="{{$restaurant}}">{{$restaurant}}</option>
+                        <option value="{{$restaurant}}" @if(session('restaurant') == $restaurant) selected @endif>{{$restaurant}}</option>
                     @endforeach
                 </select>
 

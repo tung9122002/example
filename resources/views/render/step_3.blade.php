@@ -1,7 +1,10 @@
 @extends('layouts.layout')
 
-@section('content')
 
+@section('content')
+    @php
+        $chooseDishes = session('dishes') ?? [];
+    @endphp
     <div class="row text-center">
         <div class="col-sm border">
             <div class="text-dark" >
@@ -27,21 +30,44 @@
     <form method="GET" action="{{ route('step', ['tab' => 'review']) }}">
         <div class="mt-3 row">
             <div class="mt-10 col-md-12" id="price-time-fields">
-                <div class="d-flex justify-content-between ml-3">
-                    <div class="form-group col-md-6">
-                        <label for="dish_1" class="input-label">Please Select a dish</label>
-                        <select class="form-control" name="dishes[]" id="dish_1" required>
-                            <option value="">---- Choose ----</option>
-                            @foreach($filteredDishes as $dish)
-                                <option value="{{$dish->name}}">{{$dish->name}}</option>
-                            @endforeach
-                        </select>
+                @if(count($chooseDishes) > 0)
+                    @foreach($chooseDishes as $key => $choose)
+                    <div class="d-flex justify-content-between ml-3">
+                        <div class="form-group col-md-6">
+                            <label for="dish_{{$key}}" class="input-label">Please Select a dish</label>
+                            <select class="form-control" name="dishes[]" id="dish_{{$key}}" required data-index="{{$key}}">
+                                <option value="">---- Choose ----</option>
+                                @foreach($filteredDishes as $dish)
+                                    <option value="{{$dish->name}}" @if($choose['name'] == $dish->name) selected @endif>{{$dish->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="service_{{$key}}" class="input-label">Please Enter no of servings</label>
+                            <input class="form-control" name="services[]" id="service_{{$key}}" type="number" value="{{$choose['servings'] ?? 1}}" min="1" data-index="{{$key}}"/>
+                        </div>
+                        @if($key != 0)
+                            <button style="margin-top: 26px; height: 35px; margin-left: 20px;" onclick="deletePriceandTime(event)" data-price-time-index="{{$key}}" type="button" class="btn btn-danger delete-price-time-btn">Xóa</button>
+                        @endif
                     </div>
-                    <div class="form-group">
-                        <label for="service_1" class="input-label">Please Enter no of servings</label>
-                        <input class="form-control" name="services[]" id="service_1" type="number" value="1" min="1" />
+                    @endforeach
+                @else
+                    <div class="d-flex justify-content-between ml-3">
+                        <div class="form-group col-md-6">
+                            <label for="dish_1" class="input-label">Please Select a dish</label>
+                            <select class="form-control" name="dishes[]" id="dish_1" required>
+                                <option value="">---- Choose ----</option>
+                                @foreach($filteredDishes as $dish)
+                                    <option value="{{$dish->name}}">{{$dish->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="service_1" class="input-label">Please Enter no of servings</label>
+                            <input class="form-control" name="services[]" id="service_1" type="number" value="1" min="1" />
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
             <div id="add-price-time-btn" class="row p-3 mr-1 d-flex ml-4">
                 <button type="button" class="btn btn--primary btn-outline-primary">Thêm</button>
@@ -119,12 +145,22 @@
                 newPriceField.remove();
                 disableSelectedOptions();
             });
-
             // Update the disable options logic
             disableSelectedOptions();
-
             priceIndex++;
         });
+        function deletePriceandTime(event) {
+            const index = event.target.getAttribute('data-price-time-index');
+            const dishElement = document.querySelector(`select[name="dishes[]"][data-index="${index}"]`);
+            const serviceElement = document.querySelector(`input[name="services[]"][data-index="${index}"]`);
+
+            if (dishElement && serviceElement) {
+                const parentDiv = dishElement.closest('.d-flex'); // Tìm phần tử cha lớn nhất chứa cả dish và service
+                parentDiv.remove();
+            } else {
+                console.error("Element not found for index:", index);
+            }
+        }
 
         // Initial call to set up disable options
         window.onload = function() {
